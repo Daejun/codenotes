@@ -167,8 +167,12 @@ def audit(root, transcript):
 
 def cmd_init(args):
     root = os.path.abspath(args.path)
-    made = init.run(root, write_settings=not args.no_settings)
+    made = init.run(root, write_settings=not args.no_settings, shared=args.shared)
     print("%s 를 codenotes에 넣었다: %s" % (root, ", ".join(made)))
+    print("note는 %s." % ("저장소에 커밋된다" if args.shared else "로컬에만 남는다 (gitignore)"))
+    if args.shared:
+        print()
+        print(init.SHARED_WARNING)
     print("해제하려면 .codenotes/ 를 지운다 — hook은 그 디렉터리가 없으면 즉시 빠진다.")
     return 0
 
@@ -179,6 +183,8 @@ def main(argv=None):
     s = sub.add_parser("init"); s.add_argument("path", nargs="?", default=".")
     s.add_argument("--no-settings", action="store_true",
                    help=".claude/settings.json은 건드리지 않는다")
+    s.add_argument("--shared", action="store_true",
+                   help="note를 저장소에 커밋한다 (기본: 로컬 전용). 먼저 무엇이 적히는지 본다")
     s.set_defaults(fn=cmd_init)
     s = sub.add_parser("show"); s.add_argument("file"); s.set_defaults(fn=cmd_show)
     s = sub.add_parser("review")

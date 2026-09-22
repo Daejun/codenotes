@@ -126,20 +126,28 @@ watermark와 `tid` dedup으로 처리한다.
 
 ```
 .codenotes/
-  config.json             # budget_chars, why_max, ask_missing
+  config.json             # budget_chars, why_max, ask_missing, shared
   state.json              # gitignore. watermark와 본 tid — sidecar에서 재생성된다
   hook.log                # gitignore
   src/gc.c.jsonl          # sidecar: 소스 트리를 미러링, 원본 확장자 유지 + .jsonl
-  fs/core/segment.c.jsonl
+  fs/core/segment.c.jsonl  # shared가 아니면 이것들도 gitignore
 ```
 
 **색인을 두지 않는다.** FTS5는 드문 질의에서 확실히 빠르지만(note 20만 건에 34ms -> 0.31ms),
 현실 규모인 1만 건에서 전수 스캔이 1.8ms다. CLI 한 번에 1.8ms면 색인을 동기화하고 재생성하고
 stale을 걱정할 값어치가 없다. note가 5만 건을 넘어 스캔이 10ms를 넘으면 다시 본다.
 
-`.codenotes/**/*.jsonl`은 저장소에 커밋한다(review에서 같이 읽어야 한다).
-`.gitattributes`에 `.codenotes/**/*.jsonl merge=union`을 걸어 merge 충돌을 피한다 —
-그래서 레코드는 **줄 단위로 독립**이어야 하고 순서에 의미를 두면 안 된다.
+**기본값은 gitignore다.** note의 why는 모델이 편집 직전에 쓴 말에서 나오므로,
+그 말에 비공개 프로젝트 이름이나 내부 경로가 섞이면 그대로 sidecar에 적히고 커밋된다.
+이 저장소도 그래서 로컬 전용으로 둔다 — 실제로 한 번 섞였고 저장소를 갈아엎어야 했다.
+
+공유가 필요하면 `codenotes init --shared`다. 그때는 `.gitattributes`에
+`.codenotes/**/*.jsonl merge=union`이 붙는다. 그래서 레코드는 **줄 단위로 독립**이어야 하고
+순서에 의미를 두면 안 된다. 켜기 전에 무엇이 적히는지 먼저 본다:
+
+```bash
+git ls-files -z | xargs -0 grep -ril '<밖에 나가면 안 되는 말>'
+```
 
 레코드 한 줄:
 

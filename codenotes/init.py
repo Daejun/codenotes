@@ -11,6 +11,8 @@ from . import config
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 GITIGNORE = [".codenotes/state.json", ".codenotes/hook.log"]
+# note를 공유하지 않을 때 추가로 무시할 것. 기본값이다.
+GITIGNORE_LOCAL = [".codenotes/**/*.jsonl"]
 GITATTR = ".codenotes/**/*.jsonl merge=union"
 
 DEFAULT_CONFIG = {
@@ -18,7 +20,17 @@ DEFAULT_CONFIG = {
     "why_max": 240,            # why 한 건의 상한 (불변식 7)
     "seen_cap": 5000,          # state.json이 기억할 tid 수
     "ask_missing": False,      # 이유가 빈 편집을 Stop에서 되묻는다 (모델 왕복 1회)
+    "shared": False,           # note를 저장소에 커밋한다. 아래 주의를 읽고 켠다
 }
+
+SHARED_WARNING = """\
+note의 why는 **모델이 편집 직전에 쓴 말**에서 나온다. 그 말에 비공개 프로젝트 이름,
+내부 경로, 사람 이름이 섞이면 그대로 sidecar에 적히고 커밋된다.
+그래서 기본값은 공유하지 않음이다. 켜려면 config.json의 shared를 true로 두고,
+push 전에 무엇이 적혔는지 직접 본다:
+
+    git ls-files -z | xargs -0 grep -ril '<밖에 나가면 안 되는 말>'
+"""
 
 
 def settings_block(home=HERE):
@@ -75,7 +87,7 @@ def merge_settings(path, block):
     return data
 
 
-def run(root, write_settings=True):
+def run(root, write_settings=True, shared=False):
     root = os.path.abspath(root)
     out = []
     d = os.path.join(root, config.DIRNAME)
@@ -84,14 +96,17 @@ def run(root, write_settings=True):
 
     cfg = os.path.join(d, "config.json")
     if not os.path.exists(cfg):
+        conf = dict(DEFAULT_CONFIG, shared=shared)
         with open(cfg, "w", encoding="utf-8") as f:
-            json.dump(DEFAULT_CONFIG, f, ensure_ascii=False, indent=1)
+            json.dump(conf, f, ensure_ascii=False, indent=1)
             f.write("\n")
         out.append("config.json")
 
-    if append_lines(os.path.join(root, ".gitignore"), GITIGNORE, "codenotes"):
+    # 공유하지 않으면 note 자체를 무시한다. 공유하면 merge=union으로 충돌을 피한다.
+    ignore = GITIGNORE if shared else GITIGNORE + GITIGNORE_LOCAL
+    if append_lines(os.path.join(root, ".gitignore"), ignore, "codenotes"):
         out.append(".gitignore")
-    if append_lines(os.path.join(root, ".gitattributes"), [GITATTR], "codenotes"):
+    if shared and append_lines(os.path.join(root, ".gitattributes"), [GITATTR], "codenotes"):
         out.append(".gitattributes")
 
     if write_settings:

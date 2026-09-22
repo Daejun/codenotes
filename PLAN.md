@@ -66,7 +66,7 @@ step 3의 검토 항목. 하나라도 "아니오"면 그 Phase는 아직 착수�
 | 항목 | 결정 |
 | --- | --- |
 | 저장 형태 | 코드 파일마다 sidecar. `.codenotes/<소스 경로>.jsonl` (소스 트리 미러링) |
-| git | sidecar JSONL은 커밋, `index.sqlite`와 `hook.log`는 gitignore, JSONL은 `merge=union` |
+| git | **기본은 전부 gitignore.** `codenotes init --shared`로 켜면 JSONL을 커밋하고 `merge=union`을 건다 |
 | why 출처 | PostToolUse에서 transcript 자동 추출 + Stop에서 보강 |
 | 설치 | 프로젝트별 `.claude/settings.json`. 배포는 plugin(`claude plugin install --scope project`), `.codenotes/` 준비는 `codenotes init` |
 | 구현 | python3 stdlib 전용, 의존성 0 |
