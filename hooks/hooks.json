@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_edit_recall.py",
+            "timeout": 10,
+            "statusMessage": "codenotes recall"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/turn_capture.py",
+            "timeout": 15,
+            "statusMessage": "codenotes capture"
+          }
+        ]
+      }
+    ]
+  }
+}

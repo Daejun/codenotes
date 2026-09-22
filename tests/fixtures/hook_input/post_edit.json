@@ -1,0 +1,50 @@
+{
+ "session_id": "00000000-0000-4000-8000-000000000000",
+ "transcript_path": "/home/dev/.claude/projects/-home-dev-codenotes/00000000-0000-4000-8000-000000000000.jsonl",
+ "cwd": "/home/dev/codenotes",
+ "scratchpad_dir": "/tmp/claude-1000/-home-dev-codenotes/00000000-0000-4000-8000-000000000000/scratchpad",
+ "prompt_id": "3b586d59-25ef-4b31-b9a9-d2e639acbd92",
+ "permission_mode": "bypassPermissions",
+ "effort": {
+  "level": "xhigh"
+ },
+ "hook_event_name": "PostToolUse",
+ "tool_name": "Edit",
+ "tool_input": {
+  "file_path": "/home/dev/codenotes/tests/corpus/gc_sample.c",
+  "old_string": "\twhile (!kthread_should_stop()) {\n\t\tif (victim_zone(sbi, &zone))\n\t\t\tcontinue;\n\t\tzone_reset(sbi, zone);\n\t}",
+  "new_string": "\twhile (!kthread_should_stop()) {\n\t\tif (victim_zone(sbi, &zone)) {\n\t\t\tschedule_timeout_interruptible(HZ);\n\t\t\tcontinue;\n\t\t}\n\t\tzone_reset(sbi, zone);\n\t}",
+  "replace_all": false
+ },
+ "tool_response": {
+  "filePath": "/home/dev/codenotes/tests/corpus/gc_sample.c",
+  "oldString": "\twhile (!kthread_should_stop()) {\n\t\tif (victim_zone(sbi, &zone))\n\t\t\tcontinue;\n\t\tzone_reset(sbi, zone);\n\t}",
+  "newString": "\twhile (!kthread_should_stop()) {\n\t\tif (victim_zone(sbi, &zone)) {\n\t\t\tschedule_timeout_interruptible(HZ);\n\t\t\tcontinue;\n\t\t}\n\t\tzone_reset(sbi, zone);\n\t}",
+  "originalFile": "/* anchor 시험용 C 표본. 그 저장소 gc.c의 형태만 흉내낸 것이고 실제 코드가 아니다.\n * 커널 C 관례(0열 여는 중괄호, static 함수)를 그대로 따라야 brace scan을 시험할 수 있다.\n */\n#include <linux/kernel.h>\n\nstatic int victim_zone(struct zone_sb_info *sbi, unsigned int *out)\n{\n\tunsigned int i, best = UINT_MAX;\n\n\tfor (i = 0; i < sbi->nr_zones; i++) {\n\t\tif (sbi->zone[i].valid_blocks < best) {\n\t\t\tbest = sbi->zone[i].valid_blocks;\n\t\t\t*out = i;\n\t\t}\n\t}\n\treturn best == UINT_MAX ? -ENOSPC : 0;\n}\n\nint zone_gc_thread(void *data)\n{\n\tstruct zone_sb_info *sbi = data;\n\tunsigned int zone;\n\n\twhile (!kthread_should_stop()) {\n\t\tif (victim_zone(sbi, &zone))\n\t\t\tcontinue;\n\t\tzone_reset(sbi, zone);\n\t}\n\treturn 0;\n}\n",
+  "structuredPatch": [
+   {
+    "oldStart": 22,
+    "oldLines": 8,
+    "newStart": 22,
+    "newLines": 10,
+    "lines": [
+     "   unsigned int zone;",
+     " ",
+     "   while (!kthread_should_stop()) {",
+     "-    if (victim_zone(sbi, &zone))",
+     "+    if (victim_zone(sbi, &zone)) {",
+     "+      schedule_timeout_interruptible(HZ);",
+     "       continue;",
+     "+    }",
+     "     zone_reset(sbi, zone);",
+     "   }",
+     "   return 0;"
+    ]
+   }
+  ],
+  "userModified": false,
+  "replaceAll": false
+ },
+ "tool_use_id": "toolu_01SQ8Gqc3b8GDC6vW1NTXgjH",
+ "duration_ms": 24
+}

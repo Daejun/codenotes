@@ -1,0 +1,8 @@
+.testrepos/
+.codenotes/hook.log
+__pycache__/
+.codenotes/hook.log
+.codenotes/state.json
+
+# 기계마다 다른 절대 경로가 들어간다. codenotes init 이 만든다.
+.claude/settings.json

@@ -1,0 +1,29 @@
+{
+  "name": "codenotes",
+  "version": "0.1.0",
+  "description": "코드가 바뀐 이유를 소스 밖 sidecar에 적어 두고, 같은 자리를 다시 고칠 때 되돌려 넣는다",
+  "author": {
+    "name": "Daejun"
+  },
+  "hooks": "./hooks/hooks.json",
+  "userConfig": {
+    "budget_chars": {
+      "type": "number",
+      "title": "주입 상한(자)",
+      "default": 1200,
+      "description": "편집 직전에 되돌려 넣을 note의 최대 글자 수"
+    },
+    "why_max": {
+      "type": "number",
+      "title": "이유 한 건의 상한(자)",
+      "default": 240,
+      "description": "note 하나의 why 길이 상한. 용량이 이 방식의 존재 이유다"
+    },
+    "ask_missing": {
+      "type": "boolean",
+      "title": "이유가 비면 되묻기",
+      "default": false,
+      "description": "이유가 기록되지 않은 편집이 있으면 턴 끝에 한 번 되묻는다. 모델 왕복이 1회 는다"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+#!/usr/bin/env python3
+"""codenotes CLI 실행기. 어느 디렉터리에서 불러도 패키지를 찾게 한다."""
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+from codenotes.__main__ import main  # noqa: E402
+
+sys.exit(main())

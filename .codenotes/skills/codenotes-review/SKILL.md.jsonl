@@ -1,0 +1,1 @@
+{"v":1,"id":"n_1245dd","ts":"2026-09-22T12:52:17Z","sid":"00000000","pid":"c53ad66d","tid":"toolu_016FUaFK5TQvg8TfSUmQjakQ","op":"create","anchor":{"sym":null,"kind":"file","hash":null,"lines":[1,58]},"d":{"add":58,"del":0},"why":"opt-in이 아닌 저장소는 exit 0, 출력 0 byte, 16~19ms(python 기동분)이고 디렉터리도 안 생깁니다. plugin으로 포장합니다 — 저장소 root가 곧 plugin root입니다.","src":"text","conf":0.7}

@@ -1,0 +1,1 @@
+{"v":1,"id":"n_511d61","ts":"2026-09-22T12:52:17Z","sid":"00000000","pid":"c53ad66d","tid":"toolu_01GdSivBRahsMBZ1JN3ZrBt7","op":"create","anchor":{"sym":null,"kind":"file","hash":null,"lines":[1,103]},"d":{"add":103,"del":0},"why":"`codenotes init`을 만들고 이 저장소 밖(`.testrepos/<clone>`)에서 실제로 돌립니다.","src":"text","conf":0.7}

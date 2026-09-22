@@ -1,0 +1,16 @@
+{
+ "session_id": "00000000-0000-4000-8000-000000000000",
+ "transcript_path": "/home/dev/.claude/projects/-home-dev-codenotes/00000000-0000-4000-8000-000000000000.jsonl",
+ "cwd": "/home/dev/codenotes",
+ "scratchpad_dir": "/tmp/claude-1000/-home-dev-codenotes/00000000-0000-4000-8000-000000000000/scratchpad",
+ "prompt_id": "3b586d59-25ef-4b31-b9a9-d2e639acbd92",
+ "permission_mode": "bypassPermissions",
+ "effort": {
+  "level": "xhigh"
+ },
+ "hook_event_name": "Stop",
+ "stop_hook_active": false,
+ "last_assistant_message": "Phase 0 완료. loop 1회전(수행 → log → Phase 1 개정 → 검토 보강)을 돌렸습니다.\n\n## Phase 0 결과 — 계획의 전제가 둘 무너졌습니다\n\n계측 hook을 `.claude/settings.json`에 걸고 `Write` 1회, `Edit` 1회를 실제로 일으켜 받은 입력 24건입니다.\n\n**1. `thinking`이 transcript에 저장되지 않습니다.** 블록은 남지만 본문이 빈 문자열이고 `signature`만 2,532~4,916 byte 붙습니다. \"PostToolUse에서 thinking을 잘라 why로 쓴다\"는 1차 설계가 통째로 사라졌습니다.\n\n**2. PostToolUse 시점에 그 레코드가 아직 flush 전입니다.** 두 사례 모두 hook이 본 줄수보다 3줄 뒤에 쓰였습니다.\n\n| tool | hook이 본 줄수 | 실제 기록된 줄 |\n| --- | --- | --- |\n| Write | 285 | 288 |\n| Edit | 302 | 305 |\n\n**3. 남은 자동 출처마저 70%가 빕니다.** tool_use를 낸 assistant message 40개 중 text 블록을 동반한 것이 12개(30%)뿐입니다. 나머지는 연속 도구 호출이라 글자가 없습니다.\n\n**4. 대신 `toolUseResult`가 `originalFile`(편집 전 전체)과 `structuredPatch`를 공짜로 줍니다.** diff를 계산할 이유가 없고, 같은 것이 transcript에도 남아 Stop에서 그 턴의 편집을 patch까지 복원할 수 있습니다.\n\n그 밖에: `file_path`는 최상위에 오지 않습니다(공식 문서와 다름), `PostToolBatch`의 키는 `tool_calls`이고 matcher 없이 걸면 Bash에도 붙습니다(19/24건이 이것), settings.json은 세션 재시작 없이 즉시 먹고, hook 1회 비용은 3.1ms입니다. stdin이 완전히 빈 호출도 1건 있었습니다.\n\n## 설계 변경 — hook 3개에서 2개로\n\ncapture를 PostToolUse에서 Stop으로 옮겼습니다. 편집 직후에 읽을 \"이유\"라는 것이 애초에 존재하지 않고, Stop에서는 patch까지 전부 복원되기 때문입니다.\n\n```\nPreToolUse(Edit|Write)  pre_edit_recall.py   참조\nStop                    turn_capture.py      기록 (턴당 1회)\n```\n\n불변식 8번 \"conf 0은 저장 안 함\"도 폐기했습니다. 70%가 빈 상황에서 그 규칙은 note의 70%를 버립니다. 턴 단위 why를 바닥값으로 깔고 `src`가 `text`인지 `turn`인지로 구분합니다.\n\n## loop step 3 검토가 잡은 것\n\n1. **미검증 전제** — \"Stop 시점엔 flush돼 있다\"를 3줄 lag에서 추론만 했습니다. Stop 덤프는 이 턴이 끝나야 생깁니다. Phase 1의 gate 0으로 올렸고, 다음 턴 시작에 `logs/phase0/*Stop*.json`을 열어 확인합니다.\n2. **성공 기준의 분모가 틀렸습니다** — \"transcript의 Edit/Write 개수\"가 아니라 \"제외 규칙을 통과한 개수\"입니다.\n3. **`prompt_id`로 턴을 자를 수 없습니다** — assistant 레코드에 `promptId`가 없습니다(108건 전수). watermark + `tid` dedup으로 바꿨고, 인터럽트로 Stop이 빠진 턴을 다음 Stop이 줍는 이점이 따라왔습니다.\n\n산출물: `docs/findings-hook-io.md`, `logs/phase-0.md`, `tests/fixtures/hook_input/*.json` 5건(실제 입력 그대로), `CLAUDE.md`·`PLAN.md` 개정.\n\n다음 턴에 Phase 1 gate 0(Stop payload 확인)부터 이어갑니다.",
+ "background_tasks": [],
+ "session_crons": []
+}
